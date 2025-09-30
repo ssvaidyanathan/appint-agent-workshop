@@ -73,7 +73,7 @@ echo "Connector sfdc-connection created successfully"
 sleep 30
 
 echo "Creating Connector operation"
-integrationcli connectors operations -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN"
+integrationcli connectors operations list -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN"
 
 sleep 30
 
