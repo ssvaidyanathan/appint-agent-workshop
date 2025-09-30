@@ -32,8 +32,8 @@ add_secret(){
 publish_integration(){
   local integration=$1
   echo "Publishing $integration Integration"
-  sed -i "s/PROJECT_ID/$PROJECT_ID/g" $integration/connectors/sfdc-connection.json
-  integrationcli integrations apply -f $integration/. -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g
+  # sed -i "s/PROJECT_ID/$PROJECT_ID/g" $integration/connectors/sfdc-connection.json
+  integrationcli integrations apply -f $integration/. -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --skip-connectors
 }
 
 echo "Installing dependecies like unzip and cosign"
@@ -62,6 +62,15 @@ export SFDC_SEC_TOKEN="$(gcloud compute instances describe lab-startup --project
 
 add_secret "user-sfdc-password" "${SFDC_USER_PASS}" # TODO
 add_secret "sfdc-secret-token" "${SFDC_SEC_TOKEN}" # TODO
+
+sleep 30
+
+echo "Creating Connector sfdc-connection"
+sed -i "s/PROJECT_ID/$PROJECT_ID/g" sfdc-leads/connectors/sfdc-connection.json
+integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
+echo "Connector sfdc-connection created successfully"
+
+sleep 30
 
 publish_integration "sfdc-leads"
 publish_integration "sfdc-tasks"
