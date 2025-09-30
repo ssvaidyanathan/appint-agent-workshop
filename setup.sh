@@ -20,17 +20,6 @@ PROJECT_NUMBER="$(gcloud projects describe $PROJECT_ID --format="value(projectNu
 export PROJECT_NUMBER
 export TOKEN=$(gcloud auth print-access-token)
 
-get_metadata_property() {
-  attribute_name="$1";
-  default_value="$2"
-  ! attribute_value=$(curl -f -s "http://metadata.google.internal/computeMetadata/v1/instance/attributes/${attribute_name}" -H "Metadata-Flavor: Google")
-  if [[ -z "${attribute_value}" ]] ; then
-    echo "${default_value}"
-    return
-  fi
-  echo "${attribute_value}"
-}
-
 add_secret(){
   local SECRET_ID=$1
   local SECRET_VALUE=$2
@@ -68,8 +57,8 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
     --role="roles/secretmanager.secretAccessor"
 
-export SFDC_USER_PASS=$(get_metadata_property 'sfdcUserPass' "")
-export SFDC_SEC_TOKEN=$(get_metadata_property 'sfdcSecToken' "")
+export SFDC_USER_PASS=$(gcloud compute instances describe lab-startup --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcUserPass") | .value')
+export SFDC_SEC_TOKEN=$(gcloud compute instances describe lab-startup --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcSecToken") | .value')
 
 add_secret "user-sfdc-password" "$SFDC_USER_PASS" # TODO
 add_secret "sfdc-secret-token" "$SFDC_SEC_TOKEN" # TODO
