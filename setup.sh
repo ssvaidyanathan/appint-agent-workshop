@@ -33,7 +33,7 @@ publish_integration(){
   local integration=$1
   echo "Publishing $integration Integration"
   sed -i "s/PROJECT_ID/$PROJECT_ID/g" $integration/connectors/sfdc-connection.json
-  integrationcli integrations apply -f $integration/. -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
+  integrationcli integrations apply -f $integration/. -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g
 }
 
 echo "Installing dependecies like unzip and cosign"
