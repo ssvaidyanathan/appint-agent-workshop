@@ -60,8 +60,8 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
 export SFDC_USER_PASS=$(gcloud compute instances describe lab-startup --project ${$PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcUserPass") | .value')
 export SFDC_SEC_TOKEN=$(gcloud compute instances describe lab-startup --project ${$PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcSecToken") | .value')
 
-add_secret "user-sfdc-password" "$SFDC_USER_PASS" # TODO
-add_secret "sfdc-secret-token" "$SFDC_SEC_TOKEN" # TODO
+add_secret "user-sfdc-password" "${SFDC_USER_PASS}" # TODO
+add_secret "sfdc-secret-token" "${SFDC_SEC_TOKEN}" # TODO
 
 publish_integration "sfdc-leads"
 publish_integration "sfdc-tasks"
