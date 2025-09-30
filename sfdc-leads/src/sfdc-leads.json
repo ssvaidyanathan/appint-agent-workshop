@@ -1,0 +1,348 @@
+{
+	"snapshotNumber": "3",
+	"triggerConfigs": [
+		{
+			"label": "Create Leads",
+			"triggerType": "API",
+			"triggerNumber": "1",
+			"triggerId": "api_trigger/create-leads",
+			"startTasks": [
+				{
+					"taskId": "1"
+				}
+			],
+			"properties": {
+				"Trigger name": "create-leads"
+			}
+		},
+		{
+			"label": "Get Leads",
+			"triggerType": "API",
+			"triggerNumber": "2",
+			"triggerId": "api_trigger/get-leads",
+			"startTasks": [
+				{
+					"taskId": "5"
+				}
+			],
+			"properties": {
+				"Trigger name": "get-leads"
+			}
+		}
+	],
+	"taskConfigs": [
+		{
+			"task": "FieldMappingTask",
+			"taskId": "1",
+			"parameters": {
+				"FieldMappingConfigTaskParameterKey": {
+					"key": "FieldMappingConfigTaskParameterKey",
+					"value": {
+						"jsonValue": "{\n  \"@type\": \"type.googleapis.com/enterprise.crm.eventbus.proto.FieldMappingConfig\",\n  \"mappedFields\": [{\n    \"inputField\": {\n      \"fieldType\": \"STRING_VALUE\",\n      \"transformExpression\": {\n        \"initialValue\": {\n          \"referenceValue\": \"$firstName$\"\n        }\n      }\n    },\n    \"outputField\": {\n      \"referenceKey\": \"$`Task_2_connectorInputPayload`.FirstName$\",\n      \"fieldType\": \"JSON_VALUE\",\n      \"cardinality\": \"OPTIONAL\"\n    }\n  }, {\n    \"inputField\": {\n      \"fieldType\": \"STRING_VALUE\",\n      \"transformExpression\": {\n        \"initialValue\": {\n          \"referenceValue\": \"$company$\"\n        }\n      }\n    },\n    \"outputField\": {\n      \"referenceKey\": \"$`Task_2_connectorInputPayload`.Company$\",\n      \"fieldType\": \"STRING_VALUE\",\n      \"cardinality\": \"OPTIONAL\"\n    }\n  }, {\n    \"inputField\": {\n      \"fieldType\": \"STRING_VALUE\",\n      \"transformExpression\": {\n        \"initialValue\": {\n          \"referenceValue\": \"$status$\"\n        }\n      }\n    },\n    \"outputField\": {\n      \"referenceKey\": \"$`Task_2_connectorInputPayload`.Status$\",\n      \"fieldType\": \"STRING_VALUE\",\n      \"cardinality\": \"OPTIONAL\"\n    }\n  }, {\n    \"inputField\": {\n      \"fieldType\": \"STRING_VALUE\",\n      \"transformExpression\": {\n        \"initialValue\": {\n          \"referenceValue\": \"$lastName$\"\n        }\n      }\n    },\n    \"outputField\": {\n      \"referenceKey\": \"$`Task_2_connectorInputPayload`.LastName$\",\n      \"fieldType\": \"STRING_VALUE\",\n      \"cardinality\": \"OPTIONAL\"\n    }\n  }]\n}"
+					}
+				}
+			},
+			"displayName": "Map Lead Object",
+			"nextTasks": [
+				{
+					"taskId": "2"
+				}
+			],
+			"taskExecutionStrategy": "WHEN_ALL_SUCCEED",
+			"externalTaskType": "NORMAL_TASK"
+		},
+		{
+			"task": "GenericConnectorTask",
+			"taskId": "2",
+			"parameters": {
+				"authOverrideEnabled": {
+					"key": "authOverrideEnabled",
+					"value": {
+						"booleanValue": false
+					}
+				},
+				"connectionName": {
+					"key": "connectionName",
+					"value": {
+						"stringValue": "projects/agentspace-spark/locations/us-central1/connections/sfdc-connection"
+					}
+				},
+				"connectionVersion": {
+					"key": "connectionVersion",
+					"value": {
+						"stringValue": "projects/agentspace-spark/locations/global/providers/salesforce/connectors/salesforce/versions/1"
+					}
+				},
+				"connectorInputPayload": {
+					"key": "connectorInputPayload",
+					"value": {
+						"stringValue": "$`Task_2_connectorInputPayload`$"
+					}
+				},
+				"connectorOutputPayload": {
+					"key": "connectorOutputPayload",
+					"value": {
+						"stringValue": "$`Task_2_connectorOutputPayload`$"
+					}
+				},
+				"entityType": {
+					"key": "entityType",
+					"value": {
+						"stringValue": "Lead"
+					}
+				},
+				"operation": {
+					"key": "operation",
+					"value": {
+						"stringValue": "CREATE_ENTITY"
+					}
+				}
+			},
+			"displayName": "Create Lead",
+			"nextTasks": [
+				{
+					"taskId": "3"
+				}
+			],
+			"taskExecutionStrategy": "WHEN_ALL_SUCCEED",
+			"externalTaskType": "NORMAL_TASK"
+		},
+		{
+			"task": "FieldMappingTask",
+			"taskId": "3",
+			"parameters": {
+				"FieldMappingConfigTaskParameterKey": {
+					"key": "FieldMappingConfigTaskParameterKey",
+					"value": {
+						"jsonValue": "{\n  \"@type\": \"type.googleapis.com/enterprise.crm.eventbus.proto.FieldMappingConfig\",\n  \"mappedFields\": [{\n    \"inputField\": {\n      \"fieldType\": \"JSON_VALUE\",\n      \"transformExpression\": {\n        \"initialValue\": {\n          \"referenceValue\": \"$`Task_2_connectorOutputPayload`$\"\n        },\n        \"transformationFunctions\": [{\n          \"functionType\": {\n            \"jsonFunction\": {\n              \"functionName\": \"GET_PROPERTY\"\n            }\n          },\n          \"parameters\": [{\n            \"initialValue\": {\n              \"literalValue\": {\n                \"stringValue\": \"Id\"\n              }\n            }\n          }]\n        }]\n      }\n    },\n    \"outputField\": {\n      \"referenceKey\": \"$LeadId$\",\n      \"fieldType\": \"STRING_VALUE\",\n      \"cardinality\": \"OPTIONAL\"\n    }\n  }]\n}"
+					}
+				}
+			},
+			"displayName": "Extract Lead Id",
+			"taskExecutionStrategy": "WHEN_ALL_SUCCEED",
+			"externalTaskType": "NORMAL_TASK"
+		},
+		{
+			"task": "GenericConnectorTask",
+			"taskId": "4",
+			"parameters": {
+				"authOverrideEnabled": {
+					"key": "authOverrideEnabled",
+					"value": {
+						"booleanValue": false
+					}
+				},
+				"connectionName": {
+					"key": "connectionName",
+					"value": {
+						"stringValue": "projects/agentspace-spark/locations/us-central1/connections/sfdc-connection"
+					}
+				},
+				"connectionVersion": {
+					"key": "connectionVersion",
+					"value": {
+						"stringValue": "projects/agentspace-spark/locations/global/providers/salesforce/connectors/salesforce/versions/1"
+					}
+				},
+				"connectorOutputPayload": {
+					"key": "connectorOutputPayload",
+					"value": {
+						"stringValue": "$`Task_4_connectorOutputPayload`$"
+					}
+				},
+				"entityType": {
+					"key": "entityType",
+					"value": {
+						"stringValue": "Lead"
+					}
+				},
+				"filterClause": {
+					"key": "filterClause",
+					"value": {
+						"stringValue": "$`Task_4_filterClause`$"
+					}
+				},
+				"listEntitiesNextPageToken": {
+					"key": "listEntitiesNextPageToken",
+					"value": {
+						"stringValue": "$`Task_4_listEntitiesNextPageToken`$"
+					}
+				},
+				"listEntitiesPageSize": {
+					"key": "listEntitiesPageSize",
+					"value": {
+						"stringValue": "$`Task_4_listEntitiesPageSize`$"
+					}
+				},
+				"listEntitiesPageToken": {
+					"key": "listEntitiesPageToken",
+					"value": {
+						"stringValue": "$`Task_4_listEntitiesPageToken`$"
+					}
+				},
+				"listEntitiesSortByColumns": {
+					"key": "listEntitiesSortByColumns",
+					"value": {
+						"stringValue": "$`Task_4_listEntitiesSortByColumns`$"
+					}
+				},
+				"operation": {
+					"key": "operation",
+					"value": {
+						"stringValue": "LIST_ENTITIES"
+					}
+				}
+			},
+			"displayName": "Get Leads",
+			"taskExecutionStrategy": "WHEN_ALL_SUCCEED",
+			"externalTaskType": "NORMAL_TASK"
+		},
+		{
+			"task": "FieldMappingTask",
+			"taskId": "5",
+			"parameters": {
+				"FieldMappingConfigTaskParameterKey": {
+					"key": "FieldMappingConfigTaskParameterKey",
+					"value": {
+						"jsonValue": "{\n  \"@type\": \"type.googleapis.com/enterprise.crm.eventbus.proto.FieldMappingConfig\",\n  \"mappedFields\": [{\n    \"inputField\": {\n      \"fieldType\": \"STRING_VALUE\",\n      \"transformExpression\": {\n        \"initialValue\": {\n          \"literalValue\": {\n            \"stringValue\": \"Company\\u003d\\u0027\"\n          }\n        },\n        \"transformationFunctions\": [{\n          \"functionType\": {\n            \"stringFunction\": {\n              \"functionName\": \"CONCAT\"\n            }\n          },\n          \"parameters\": [{\n            \"initialValue\": {\n              \"referenceValue\": \"$company$\"\n            }\n          }]\n        }, {\n          \"functionType\": {\n            \"stringFunction\": {\n              \"functionName\": \"CONCAT\"\n            }\n          },\n          \"parameters\": [{\n            \"initialValue\": {\n              \"literalValue\": {\n                \"stringValue\": \"\\u0027\"\n              }\n            }\n          }]\n        }]\n      }\n    },\n    \"outputField\": {\n      \"referenceKey\": \"$`Task_4_filterClause`$\",\n      \"fieldType\": \"STRING_VALUE\",\n      \"cardinality\": \"OPTIONAL\"\n    }\n  }]\n}"
+					}
+				}
+			},
+			"displayName": "Set Company to Filter",
+			"nextTasks": [
+				{
+					"taskId": "4"
+				}
+			],
+			"taskExecutionStrategy": "WHEN_ALL_SUCCEED",
+			"externalTaskType": "NORMAL_TASK"
+		}
+	],
+	"integrationParameters": [
+		{
+			"key": "`ExecutionMode`",
+			"dataType": "STRING_VALUE",
+			"defaultValue": {
+				"stringValue": ""
+			},
+			"isTransient": true
+		},
+		{
+			"key": "`ErrorInfo`",
+			"dataType": "JSON_VALUE",
+			"defaultValue": {
+				"jsonValue": "{\n  \"message\": \"\",\n  \"code\": 0.0\n}"
+			},
+			"isTransient": true,
+			"jsonSchema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"code\": {\n      \"type\": \"number\"\n    },\n    \"message\": {\n      \"type\": \"string\"\n    }\n  }\n}"
+		},
+		{
+			"key": "`ExecutionId`",
+			"dataType": "STRING_VALUE",
+			"defaultValue": {
+				"stringValue": ""
+			},
+			"isTransient": true
+		},
+		{
+			"key": "`IntegrationName`",
+			"dataType": "STRING_VALUE",
+			"defaultValue": {
+				"stringValue": ""
+			},
+			"isTransient": true
+		},
+		{
+			"key": "`Region`",
+			"dataType": "STRING_VALUE",
+			"defaultValue": {
+				"stringValue": ""
+			},
+			"isTransient": true
+		},
+		{
+			"key": "`ProjectId`",
+			"dataType": "STRING_VALUE",
+			"defaultValue": {
+				"stringValue": ""
+			},
+			"isTransient": true
+		},
+		{
+			"key": "`Task_2_connectorInputPayload`",
+			"dataType": "JSON_VALUE",
+			"producer": "1_2",
+			"jsonSchema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"Id\": {\n      \"type\": \"string\",\n      \"description\": \"Label Lead ID corresponds to this field.\"\n    },\n    \"EmailBouncedReason\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Email Bounced Reason corresponds to this field.\"\n    },\n    \"LEA_Industry_Trends_c__c\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label LEA_Industry_Trends__c corresponds to this field.\"\n    },\n    \"IsDeleted\": {\n      \"type\": \"boolean\",\n      \"description\": \"Label Deleted corresponds to this field.\"\n    },\n    \"City\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label City corresponds to this field.\"\n    },\n    \"CurrentGenerators__c\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Current Generator(s) corresponds to this field.\"\n    },\n    \"LastModifiedById\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Last Modified By ID corresponds to this field.\"\n    },\n    \"Company\": {\n      \"type\": \"string\",\n      \"description\": \"Label Company corresponds to this field.\"\n    },\n    \"LastModifiedDate\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Last Modified Date corresponds to this field.\"\n    },\n    \"PostalCode\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Zip/Postal Code corresponds to this field.\"\n    },\n    \"Phone\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Phone corresponds to this field.\"\n    },\n    \"Email\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Email corresponds to this field.\"\n    },\n    \"Description\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Description corresponds to this field.\"\n    },\n    \"Status\": {\n      \"type\": \"string\",\n      \"description\": \"Label Status corresponds to this field.\"\n    },\n    \"CompanyDunsNumber\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Company D-U-N-S Number corresponds to this field.\"\n    },\n    \"OwnerId\": {\n      \"type\": \"string\",\n      \"description\": \"Label Owner ID corresponds to this field.\"\n    },\n    \"LEA_Potential_Products_c__c\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label LEA_Potential_Products__c corresponds to this field.\"\n    },\n    \"Salutation\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Salutation corresponds to this field.\"\n    },\n    \"Website\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Website corresponds to this field.\"\n    },\n    \"Industry\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Industry corresponds to this field.\"\n    },\n    \"Street\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Street corresponds to this field.\"\n    },\n    \"ConvertedDate\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Converted Date corresponds to this field.\"\n    },\n    \"ConvertedContactId\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Converted Contact ID corresponds to this field.\"\n    },\n    \"IsUnreadByOwner\": {\n      \"type\": \"boolean\",\n      \"description\": \"Label Unread By Owner corresponds to this field.\"\n    },\n    \"LEA_Estimated_Potential_Spend_Range_c__c\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label LEA_Estimated_Potential_Spend_Range__c corresponds to this field.\"\n    },\n    \"SystemModstamp\": {\n      \"type\": \"string\",\n      \"description\": \"Label System Modstamp corresponds to this field.\"\n    },\n    \"Name\": {\n      \"type\": \"string\",\n      \"description\": \"Label Full Name corresponds to this field.\"\n    },\n    \"ConvertedAccountId\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Converted Account ID corresponds to this field.\"\n    },\n    \"MobilePhone\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Mobile Phone corresponds to this field.\"\n    },\n    \"Country\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Country corresponds to this field.\"\n    },\n    \"Rating\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Rating corresponds to this field.\"\n    },\n    \"AnnualRevenue\": {\n      \"type\": [\"number\", \"null\"],\n      \"description\": \"Label Annual Revenue corresponds to this field.\"\n    },\n    \"Title\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Title corresponds to this field.\"\n    },\n    \"Longitude\": {\n      \"type\": [\"number\", \"null\"],\n      \"description\": \"Label Longitude corresponds to this field.\"\n    },\n    \"LastReferencedDate\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Last Referenced Date corresponds to this field.\"\n    },\n    \"EmailBouncedDate\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Email Bounced Date corresponds to this field.\"\n    },\n    \"LastActivityDate\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Last Activity corresponds to this field.\"\n    },\n    \"JigsawContactId\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Jigsaw Contact ID corresponds to this field.\"\n    },\n    \"LeadSource\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Lead Source corresponds to this field.\"\n    },\n    \"CreatedById\": {\n      \"type\": \"string\",\n      \"description\": \"Label Created By ID corresponds to this field.\"\n    },\n    \"Jigsaw\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Data.com Key corresponds to this field.\"\n    },\n    \"CleanStatus\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Clean Status corresponds to this field.\"\n    },\n    \"ConvertedOpportunityId\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Converted Opportunity ID corresponds to this field.\"\n    },\n    \"IsConverted\": {\n      \"type\": \"boolean\",\n      \"description\": \"Label Converted corresponds to this field.\"\n    },\n    \"MasterRecordId\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Master Record ID corresponds to this field.\"\n    },\n    \"State\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label State/Province corresponds to this field.\"\n    },\n    \"GeocodeAccuracy\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Geocode Accuracy corresponds to this field.\"\n    },\n    \"Latitude\": {\n      \"type\": [\"number\", \"null\"],\n      \"description\": \"Label Latitude corresponds to this field.\"\n    },\n    \"CreatedDate\": {\n      \"type\": \"string\",\n      \"description\": \"Label Created Date corresponds to this field.\"\n    },\n    \"FirstName\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label First Name corresponds to this field.\"\n    },\n    \"LastName\": {\n      \"type\": \"string\",\n      \"description\": \"Label Last Name corresponds to this field.\"\n    },\n    \"ProductInterest__c\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Product Interest corresponds to this field.\"\n    },\n    \"StateCode\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label State/Province Code corresponds to this field.\"\n    },\n    \"IsPriorityRecord\": {\n      \"type\": \"boolean\",\n      \"description\": \"Label Important corresponds to this field.\"\n    },\n    \"NumberofLocations__c\": {\n      \"type\": [\"number\", \"null\"],\n      \"description\": \"Label Number of Locations corresponds to this field.\"\n    },\n    \"LEA_Enriched_Summary_c__c\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label LEA_Enriched_Summary__c corresponds to this field.\"\n    },\n    \"IndividualId\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Individual ID corresponds to this field.\"\n    },\n    \"LEA_Identified_Pain_Points_c__c\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label LEA_Identified_Pain_Points__c corresponds to this field.\"\n    },\n    \"DandbCompanyId\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label D\\u0026B Company ID corresponds to this field.\"\n    },\n    \"CountryCode\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Country Code corresponds to this field.\"\n    },\n    \"NumberOfEmployees\": {\n      \"type\": [\"integer\", \"null\"],\n      \"description\": \"Label Employees corresponds to this field.\"\n    },\n    \"SICCode__c\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label SIC Code corresponds to this field.\"\n    },\n    \"PhotoUrl\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Photo URL corresponds to this field.\"\n    },\n    \"LastViewedDate\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Last Viewed Date corresponds to this field.\"\n    },\n    \"Fax\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Fax corresponds to this field.\"\n    },\n    \"Primary__c\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Label Primary corresponds to this field.\"\n    }\n  }\n}"
+		},
+		{
+			"key": "`Task_2_connectorOutputPayload`",
+			"dataType": "JSON_VALUE",
+			"isTransient": true,
+			"producer": "1_2"
+		},
+		{
+			"key": "LeadId",
+			"dataType": "STRING_VALUE",
+			"inputOutputType": "OUT"
+		},
+		{
+			"key": "`Task_4_listEntitiesPageSize`",
+			"dataType": "INT_VALUE",
+			"producer": "1_4"
+		},
+		{
+			"key": "`Task_4_listEntitiesPageToken`",
+			"dataType": "STRING_VALUE",
+			"producer": "1_4"
+		},
+		{
+			"key": "`Task_4_listEntitiesSortByColumns`",
+			"dataType": "STRING_ARRAY",
+			"producer": "1_4"
+		},
+		{
+			"key": "`Task_4_filterClause`",
+			"dataType": "STRING_VALUE",
+			"producer": "1_4"
+		},
+		{
+			"key": "`Task_4_connectorOutputPayload`",
+			"dataType": "JSON_VALUE",
+			"isTransient": true,
+			"inputOutputType": "OUT",
+			"producer": "1_4",
+			"jsonSchema": "{\n  \"type\": [\"array\"],\n  \"items\": {\n    \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n    \"type\": \"object\",\n    \"properties\": {\n      \"LastReferencedDate\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Last Referenced Date corresponds to this field.\"\n      },\n      \"IsDeleted\": {\n        \"type\": \"boolean\",\n        \"description\": \"Label Deleted corresponds to this field.\"\n      },\n      \"DandbCompanyId\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label D\\u0026B Company ID corresponds to this field.\"\n      },\n      \"Description\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Description corresponds to this field.\"\n      },\n      \"EmailBouncedDate\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Email Bounced Date corresponds to this field.\"\n      },\n      \"PostalCode\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Zip/Postal Code corresponds to this field.\"\n      },\n      \"ConvertedOpportunityId\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Converted Opportunity ID corresponds to this field.\"\n      },\n      \"Country\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Country corresponds to this field.\"\n      },\n      \"Rating\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Rating corresponds to this field.\"\n      },\n      \"LEA_Industry_Trends_c__c\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label LEA_Industry_Trends__c corresponds to this field.\"\n      },\n      \"IndividualId\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Individual ID corresponds to this field.\"\n      },\n      \"City\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label City corresponds to this field.\"\n      },\n      \"StateCode\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label State/Province Code corresponds to this field.\"\n      },\n      \"JigsawContactId\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Jigsaw Contact ID corresponds to this field.\"\n      },\n      \"LEA_Estimated_Potential_Spend_Range_c__c\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label LEA_Estimated_Potential_Spend_Range__c corresponds to this field.\"\n      },\n      \"Jigsaw\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Data.com Key corresponds to this field.\"\n      },\n      \"LastName\": {\n        \"type\": \"string\",\n        \"description\": \"Label Last Name corresponds to this field.\"\n      },\n      \"ConvertedDate\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Converted Date corresponds to this field.\"\n      },\n      \"Salutation\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Salutation corresponds to this field.\"\n      },\n      \"GeocodeAccuracy\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Geocode Accuracy corresponds to this field.\"\n      },\n      \"Phone\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Phone corresponds to this field.\"\n      },\n      \"SICCode__c\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label SIC Code corresponds to this field.\"\n      },\n      \"ProductInterest__c\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Product Interest corresponds to this field.\"\n      },\n      \"Longitude\": {\n        \"type\": [\"number\", \"null\"],\n        \"description\": \"Label Longitude corresponds to this field.\"\n      },\n      \"LastActivityDate\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Last Activity corresponds to this field.\"\n      },\n      \"ConvertedContactId\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Converted Contact ID corresponds to this field.\"\n      },\n      \"IsUnreadByOwner\": {\n        \"type\": \"boolean\",\n        \"description\": \"Label Unread By Owner corresponds to this field.\"\n      },\n      \"Name\": {\n        \"type\": \"string\",\n        \"description\": \"Label Full Name corresponds to this field.\"\n      },\n      \"MasterRecordId\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Master Record ID corresponds to this field.\"\n      },\n      \"State\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label State/Province corresponds to this field.\"\n      },\n      \"Company\": {\n        \"type\": \"string\",\n        \"description\": \"Label Company corresponds to this field.\"\n      },\n      \"OwnerId\": {\n        \"type\": \"string\",\n        \"description\": \"Label Owner ID corresponds to this field.\"\n      },\n      \"Status\": {\n        \"type\": \"string\",\n        \"description\": \"Label Status corresponds to this field.\"\n      },\n      \"Industry\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Industry corresponds to this field.\"\n      },\n      \"EmailBouncedReason\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Email Bounced Reason corresponds to this field.\"\n      },\n      \"LeadSource\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Lead Source corresponds to this field.\"\n      },\n      \"Title\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Title corresponds to this field.\"\n      },\n      \"LastModifiedById\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Last Modified By ID corresponds to this field.\"\n      },\n      \"AnnualRevenue\": {\n        \"type\": [\"number\", \"null\"],\n        \"description\": \"Label Annual Revenue corresponds to this field.\"\n      },\n      \"Fax\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Fax corresponds to this field.\"\n      },\n      \"LastModifiedDate\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Last Modified Date corresponds to this field.\"\n      },\n      \"MobilePhone\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Mobile Phone corresponds to this field.\"\n      },\n      \"LEA_Identified_Pain_Points_c__c\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label LEA_Identified_Pain_Points__c corresponds to this field.\"\n      },\n      \"NumberOfEmployees\": {\n        \"type\": [\"integer\", \"null\"],\n        \"description\": \"Label Employees corresponds to this field.\"\n      },\n      \"IsConverted\": {\n        \"type\": \"boolean\",\n        \"description\": \"Label Converted corresponds to this field.\"\n      },\n      \"CurrentGenerators__c\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Current Generator(s) corresponds to this field.\"\n      },\n      \"CompanyDunsNumber\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Company D-U-N-S Number corresponds to this field.\"\n      },\n      \"Email\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Email corresponds to this field.\"\n      },\n      \"IsPriorityRecord\": {\n        \"type\": \"boolean\",\n        \"description\": \"Label Important corresponds to this field.\"\n      },\n      \"Primary__c\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Primary corresponds to this field.\"\n      },\n      \"CreatedById\": {\n        \"type\": \"string\",\n        \"description\": \"Label Created By ID corresponds to this field.\"\n      },\n      \"LEA_Enriched_Summary_c__c\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label LEA_Enriched_Summary__c corresponds to this field.\"\n      },\n      \"CleanStatus\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Clean Status corresponds to this field.\"\n      },\n      \"SystemModstamp\": {\n        \"type\": \"string\",\n        \"description\": \"Label System Modstamp corresponds to this field.\"\n      },\n      \"CountryCode\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Country Code corresponds to this field.\"\n      },\n      \"FirstName\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label First Name corresponds to this field.\"\n      },\n      \"LastViewedDate\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Last Viewed Date corresponds to this field.\"\n      },\n      \"Latitude\": {\n        \"type\": [\"number\", \"null\"],\n        \"description\": \"Label Latitude corresponds to this field.\"\n      },\n      \"LEA_Potential_Products_c__c\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label LEA_Potential_Products__c corresponds to this field.\"\n      },\n      \"Website\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Website corresponds to this field.\"\n      },\n      \"NumberofLocations__c\": {\n        \"type\": [\"number\", \"null\"],\n        \"description\": \"Label Number of Locations corresponds to this field.\"\n      },\n      \"Street\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Street corresponds to this field.\"\n      },\n      \"ConvertedAccountId\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Converted Account ID corresponds to this field.\"\n      },\n      \"CreatedDate\": {\n        \"type\": \"string\",\n        \"description\": \"Label Created Date corresponds to this field.\"\n      },\n      \"Id\": {\n        \"type\": \"string\",\n        \"description\": \"Label Lead ID corresponds to this field.\"\n      },\n      \"PhotoUrl\": {\n        \"type\": [\"string\", \"null\"],\n        \"description\": \"Label Photo URL corresponds to this field.\"\n      }\n    }\n  },\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\"\n}"
+		},
+		{
+			"key": "`Task_4_listEntitiesNextPageToken`",
+			"dataType": "STRING_VALUE",
+			"isTransient": true,
+			"producer": "1_4"
+		},
+		{
+			"key": "company",
+			"dataType": "STRING_VALUE",
+			"inputOutputType": "IN"
+		},
+		{
+			"key": "firstName",
+			"dataType": "STRING_VALUE",
+			"inputOutputType": "IN"
+		},
+		{
+			"key": "lastName",
+			"dataType": "STRING_VALUE",
+			"inputOutputType": "IN"
+		},
+		{
+			"key": "status",
+			"dataType": "STRING_VALUE",
+			"inputOutputType": "IN"
+		}
+	],
+	"databasePersistencePolicy": "DATABASE_PERSISTENCE_ASYNC",
+	"cloudLoggingDetails": {
+		"cloudLoggingSeverity": "",
+		"enableCloudLogging": false
+	}
+}

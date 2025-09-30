@@ -1,0 +1,47 @@
+{
+	"connection_overrides": [
+		{
+			"taskId": "10",
+			"task": "GenericConnectorTask",
+			"parameters": {
+				"connectionName": "sfdc-connection"
+			}
+		},
+		{
+			"taskId": "13",
+			"task": "GenericConnectorTask",
+			"parameters": {
+				"connectionName": "sfdc-connection"
+			}
+		},
+		{
+			"taskId": "2",
+			"task": "GenericConnectorTask",
+			"parameters": {
+				"connectionName": "sfdc-connection"
+			}
+		},
+		{
+			"taskId": "7",
+			"task": "GenericConnectorTask",
+			"parameters": {
+				"connectionName": "sfdc-connection"
+			}
+		},
+		{
+			"taskId": "9",
+			"task": "GenericConnectorTask",
+			"parameters": {
+				"connectionName": "sfdc-connection"
+			}
+		}
+	],
+	"integration_overrides": {
+		"databasePersistencePolicy": "DATABASE_PERSISTENCE_ASYNC",
+		"enableVariableMasking": false,
+		"cloudLoggingDetails": {
+			"cloudLoggingSeverity": "CLOUD_LOGGING_SEVERITY_UNSPECIFIED",
+			"enableCloudLogging": false
+		}
+	}
+}

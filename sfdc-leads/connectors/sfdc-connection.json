@@ -1,0 +1,54 @@
+{
+	"connectorDetails": {
+		"name": "salesforce",
+		"provider": "salesforce",
+		"version": 1
+	},
+	"configVariables": [
+		{
+			"key": "use_sandbox",
+			"boolValue": false
+		},
+		{
+			"key": "proxy_enabled",
+			"boolValue": false
+		}
+	],
+	"authConfig": {
+		"authType": "USER_PASSWORD",
+		"userPassword": {
+			"username": "gagankaur+dev@google.com",
+			"passwordDetails": {
+				"secretName": "user-sfdc-password"
+			}
+		},
+		"additionalVariables": [
+			{
+				"key": "security_token",
+				"secretValue": {
+					"secretVersion": "projects/$PROJECT_ID$/secrets/sfdc-secret-token/versions/1"
+				}
+			}
+		]
+	},
+	"nodeConfig": {
+		"minNodeCount": 2,
+		"maxNodeCount": 5
+	},
+	"destinationConfigs": [
+		{
+			"key": "login_url"
+		}
+	],
+	"logConfig": {
+		"enabled": true,
+		"level": "INFO"
+	},
+	"sslConfig": {
+		"type": "TLS",
+		"privateServerCertificate": {},
+		"clientCertificate": {},
+		"clientPrivateKey": {},
+		"clientPrivateKeyPass": {}
+	}
+}
