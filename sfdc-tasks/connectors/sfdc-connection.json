@@ -26,7 +26,7 @@
 			{
 				"key": "security_token",
 				"secretValue": {
-					"secretVersion": "projects/$PROJECT_ID$/secrets/sfdc-secret-token/versions/1"
+					"secretVersion": "projects/PROJECT_ID/secrets/sfdc-secret-token/versions/1"
 				}
 			}
 		]
