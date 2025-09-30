@@ -66,3 +66,6 @@ add_secret "sfdc-secret-token" "$SFDC_SEC_TOKEN" # TODO
 publish_integration "sfdc-leads"
 publish_integration "sfdc-tasks"
 publish_integration "sfdc-opportunity"
+
+echo "Cleanup metadata"
+gcloud compute instances remove-metadata lab-startup --zone="${GCP_PROJECT_ZONE}" --keys=sfdcSecToken,sfdcUserPass
