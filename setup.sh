@@ -48,9 +48,6 @@ chmod +x /usr/local/bin/cosign
 
 gcloud config set project $PROJECT_ID
 
-gcloud services enable logging.googleapis.com aiplatform.googleapis.com secretmanager.googleapis.com --project "$PROJECT_ID"
-sleep 15
-
 echo "Installing integrationcli"
 curl -L https://raw.githubusercontent.com/GoogleCloudPlatform/application-integration-management-toolkit/main/downloadLatest.sh | sh -
 export PATH=$PATH:$HOME/.integrationcli/bin
