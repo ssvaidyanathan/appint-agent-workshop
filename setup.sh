@@ -27,13 +27,15 @@ add_secret(){
   gcloud secrets create "$SECRET_ID" --replication-policy="automatic" --project "$PROJECT_ID"
   echo -n "$SECRET_VALUE" | gcloud secrets versions add "$SECRET_ID" --project "$PROJECT_ID" --data-file=- 
   echo "Secret $SECRET_ID created successfully"
+  sleep 10
 }
 
 publish_integration(){
   local integration=$1
   echo "Publishing $integration Integration"
-  # sed -i "s/PROJECT_ID/$PROJECT_ID/g" $integration/connectors/sfdc-connection.json
-  integrationcli integrations apply -f $integration/. -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --skip-connectors
+  sed -i "s/PROJECT_ID/$PROJECT_ID/g" $integration/connectors/sfdc-connection.json
+  integrationcli integrations apply -f $integration/. -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g
+  sleep 10
 }
 
 echo "Installing dependecies like unzip and cosign"
@@ -57,73 +59,17 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
     --role="roles/secretmanager.secretAccessor"
 
-## BQ start
+sleep 600
 
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
-    --role="roles/bigquery.readSessionUser"
+export SFDC_USER_PASS="$(gcloud compute instances describe lab-startup --project ${PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcUserPass") | .value')"
+export SFDC_SEC_TOKEN="$(gcloud compute instances describe lab-startup --project ${PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcSecToken") | .value')"
 
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
-    --role="roles/bigquery.jobUser"
+add_secret "user-sfdc-password" "${SFDC_USER_PASS}" # TODO
+add_secret "sfdc-secret-token" "${SFDC_SEC_TOKEN}" # TODO
 
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
-    --role="roles/bigquery.dataEditor"
+publish_integration "sfdc-leads"
+publish_integration "sfdc-tasks"
+publish_integration "sfdc-opportunity"
 
-echo "Creating the order_sample_data dataset"
-gcloud services enable bigquery.googleapis.com --project $PROJECT_ID
-
-bq --location=$GCP_PROJECT_REGION mk \
-    --dataset \
-    --description "Order Sample Dataset" \
-    $PROJECT_ID:order_sample_data
-
-echo "Creating orders table"
-
-bq mk \
- --table \
- --description "order_sample_data table" \
- order_sample_data.orders \
- order_id:STRING,quantity:STRING,product:STRING,customer_name:STRING,shipping_address:STRING
-
-echo "Creating Connector sbq-orders"
-sed -i "s/PROJECT_ID/$PROJECT_ID/g" sfdc-leads/connectors/bq-orders.json
-integrationcli connectors create -n bq-orders -f sfdc-leads/connectors/bq-orders.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
-
-sleep 30
-
-## BQ end
-
-# export SFDC_USER_PASS="$(gcloud compute instances describe lab-startup --project ${PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcUserPass") | .value')"
-# export SFDC_SEC_TOKEN="$(gcloud compute instances describe lab-startup --project ${PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcSecToken") | .value')"
-
-# add_secret "user-sfdc-password" "${SFDC_USER_PASS}" # TODO
-# add_secret "sfdc-secret-token" "${SFDC_SEC_TOKEN}" # TODO
-
-# sleep 30
-
-# set +e
-# echo "Creating Connector sfdc-connection"
-# sed -i "s/PROJECT_ID/$PROJECT_ID/g" sfdc-leads/connectors/sfdc-connection.json
-# integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
-# result=$?
-# set -e
-# sleep 30
-
-# if [ $result -ne 0 ]; then
-#   echo "Connector operation"
-#   integrationcli connectors operations list -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN"
-
-#   echo "Retrying Connector creation"
-#   integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
-#   sleep 30
-# fi
-# echo "Connector sfdc-connection created successfully"
-
-# publish_integration "sfdc-leads"
-# publish_integration "sfdc-tasks"
-# publish_integration "sfdc-opportunity"
-
-# echo "Cleanup metadata"
-# gcloud compute instances remove-metadata lab-startup --project="${PROJECT_ID}" --zone="${GCP_PROJECT_ZONE}" --keys=sfdcSecToken,sfdcUserPass
+echo "Cleanup metadata"
+gcloud compute instances remove-metadata lab-startup --project="${PROJECT_ID}" --zone="${GCP_PROJECT_ZONE}" --keys=sfdcSecToken,sfdcUserPass
