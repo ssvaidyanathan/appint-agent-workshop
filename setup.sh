@@ -18,10 +18,6 @@ set -e
 
 PROJECT_NUMBER="$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")"
 export PROJECT_NUMBER
-
-export APPINT_PROJECT_ID="${PROJECT_ID}"
-export APPINT_REGION="${GCP_PROJECT_REGION}"
-
 export TOKEN=$(gcloud auth print-access-token)
 
 add_secret(){
@@ -37,7 +33,7 @@ publish_integration(){
   local integration=$1
   echo "Publishing $integration Integration"
   sed -i "s/PROJECT_ID/$PROJECT_ID/g" $integration/connectors/sfdc-connection.json
-  integrationcli integrations apply -f $integration/. -p "$APPINT_PROJECT_ID" -r "$APPINT_REGION" -t "$TOKEN" -g --wait
+  integrationcli integrations apply -f $integration/. -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
 }
 
 echo "Installing dependecies like unzip and cosign"
@@ -61,8 +57,8 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
     --role="roles/secretmanager.secretAccessor"
 
-add_secret "user-sfdc-password" "$SFDC_USER_PWD" # TODO
-add_secret "sfdc-secret-token" "$SFDC_SECRET_TOKEN" # TODO
+add_secret "user-sfdc-password" "$SFDC_USER_PASS" # TODO
+add_secret "sfdc-secret-token" "$SFDC_SEC_TOKEN" # TODO
 
 publish_integration "sfdc-leads"
 publish_integration "sfdc-tasks"
