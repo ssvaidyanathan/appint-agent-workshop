@@ -13,6 +13,19 @@
 			],
 			"properties": {
 				"Trigger name": "create-task"
+			},
+			"inputVariables": {
+				"names": [
+					"accountName",
+					"emailId",
+					"subject",
+					"dueDate"
+				]
+			},
+			"outputVariables": {
+				"names": [
+					"`Task_13_connectorOutputPayload`"
+				]
 			}
 		},
 		{
@@ -27,6 +40,17 @@
 			],
 			"properties": {
 				"Trigger name": "get-user-tasks"
+			},
+			"inputVariables": {
+				"names": [
+					"accountName",
+					"emailId"
+				]
+			},
+			"outputVariables": {
+				"names": [
+					"`Task_8_connectorOutputPayload`"
+				]
 			}
 		}
 	],
@@ -685,7 +709,8 @@
 		{
 			"key": "accountName",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Name of the account"
 		},
 		{
 			"key": "emailId",
@@ -693,22 +718,26 @@
 			"defaultValue": {
 				"stringValue": "gagankaur@google.com"
 			},
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Email address"
 		},
 		{
 			"key": "priority",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Priority of the task"
 		},
 		{
 			"key": "status",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Task Status"
 		},
 		{
 			"key": "subject",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Task Subject"
 		},
 		{
 			"key": "dueDate",
@@ -716,7 +745,8 @@
 			"defaultValue": {
 				"stringValue": "2025-09-30"
 			},
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Task Due Date in the format YYYY-MM-DD"
 		}
 	],
 	"databasePersistencePolicy": "DATABASE_PERSISTENCE_ASYNC",

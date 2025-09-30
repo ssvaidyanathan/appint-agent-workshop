@@ -1,5 +1,5 @@
 {
-	"snapshotNumber": "3",
+	"snapshotNumber": "4",
 	"triggerConfigs": [
 		{
 			"label": "Create Opportunity",
@@ -13,6 +13,20 @@
 			],
 			"properties": {
 				"Trigger name": "create_opportunity"
+			},
+			"inputVariables": {
+				"names": [
+					"OpportunityName",
+					"AccountName",
+					"OpportunityOwner",
+					"OpportunityStageName",
+					"OpportunityCloseDate"
+				]
+			},
+			"outputVariables": {
+				"names": [
+					"OpportunityId"
+				]
 			}
 		},
 		{
@@ -27,6 +41,16 @@
 			],
 			"properties": {
 				"Trigger name": "list-opportunities"
+			},
+			"inputVariables": {
+				"names": [
+					"AccountName"
+				]
+			},
+			"outputVariables": {
+				"names": [
+					"`Task_13_connectorOutputPayload`"
+				]
 			}
 		}
 	],
@@ -556,7 +580,8 @@
 		{
 			"key": "OpportunityName",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Name of the Opportunity"
 		},
 		{
 			"key": "OpportunityId",
@@ -716,12 +741,14 @@
 		{
 			"key": "AccountName",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Name of the Account"
 		},
 		{
 			"key": "OpportunityOwner",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Opportunity Owner"
 		},
 		{
 			"key": "OpportunityStageName",
@@ -729,7 +756,8 @@
 			"defaultValue": {
 				"stringValue": "Qualification"
 			},
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Stage of the Opportunity"
 		},
 		{
 			"key": "OpportunityCloseDate",
@@ -737,7 +765,8 @@
 			"defaultValue": {
 				"stringValue": "2025-09-30"
 			},
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Opportunity close date in the format \"YYYY-MM-DD\""
 		}
 	],
 	"databasePersistencePolicy": "DATABASE_PERSISTENCE_ASYNC",

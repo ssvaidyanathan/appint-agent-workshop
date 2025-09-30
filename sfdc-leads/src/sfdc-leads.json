@@ -13,6 +13,19 @@
 			],
 			"properties": {
 				"Trigger name": "create-leads"
+			},
+			"inputVariables": {
+				"names": [
+					"company",
+					"firstName",
+					"lastName",
+					"status"
+				]
+			},
+			"outputVariables": {
+				"names": [
+					"LeadId"
+				]
 			}
 		},
 		{
@@ -27,6 +40,16 @@
 			],
 			"properties": {
 				"Trigger name": "get-leads"
+			},
+			"inputVariables": {
+				"names": [
+					"company"
+				]
+			},
+			"outputVariables": {
+				"names": [
+					"`Task_4_connectorOutputPayload`"
+				]
 			}
 		}
 	],
@@ -322,22 +345,26 @@
 		{
 			"key": "company",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Company Name for the Lead"
 		},
 		{
 			"key": "firstName",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Lead First Name"
 		},
 		{
 			"key": "lastName",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Lead Last Name"
 		},
 		{
 			"key": "status",
 			"dataType": "STRING_VALUE",
-			"inputOutputType": "IN"
+			"inputOutputType": "IN",
+			"description": "Lead Status"
 		}
 	],
 	"databasePersistencePolicy": "DATABASE_PERSISTENCE_ASYNC",
