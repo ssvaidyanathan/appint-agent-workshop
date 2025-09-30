@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -e
+#set -e
 
 PROJECT_NUMBER="$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")"
 export PROJECT_NUMBER
@@ -70,6 +70,15 @@ sed -i "s/PROJECT_ID/$PROJECT_ID/g" sfdc-leads/connectors/sfdc-connection.json
 integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
 echo "Connector sfdc-connection created successfully"
 
+sleep 30
+
+echo "Creating Connector operation"
+integrationcli connectors operations -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN"
+
+sleep 30
+
+echo "Retrying Connector creation without wait"
+integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g
 sleep 30
 
 publish_integration "sfdc-leads"
