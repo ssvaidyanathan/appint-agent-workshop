@@ -57,35 +57,73 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
     --role="roles/secretmanager.secretAccessor"
 
-export SFDC_USER_PASS="$(gcloud compute instances describe lab-startup --project ${PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcUserPass") | .value')"
-export SFDC_SEC_TOKEN="$(gcloud compute instances describe lab-startup --project ${PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcSecToken") | .value')"
+## BQ start
 
-add_secret "user-sfdc-password" "${SFDC_USER_PASS}" # TODO
-add_secret "sfdc-secret-token" "${SFDC_SEC_TOKEN}" # TODO
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+    --role="roles/bigquery.readSessionUser"
+
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+    --role="roles/bigquery.jobUser"
+
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
+    --role="roles/bigquery.dataEditor"
+
+echo "Creating the order_sample_data dataset"
+gcloud services enable bigquery.googleapis.com --project $PROJECT_ID
+
+bq --location=$GCP_PROJECT_REGION mk \
+    --dataset \
+    --description "Order Sample Dataset" \
+    $PROJECT_ID:order_sample_data
+
+echo "Creating orders table"
+
+bq mk \
+ --table \
+ --description "order_sample_data table" \
+ order_sample_data.orders \
+ order_id:STRING,quantity:STRING,product:STRING,customer_name:STRING,shipping_address:STRING
+
+echo "Creating Connector sbq-orders"
+sed -i "s/PROJECT_ID/$PROJECT_ID/g" sfdc-leads/connectors/bq-orders.json
+integrationcli connectors create -n bq-orders -f sfdc-leads/connectors/bq-orders.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
 
 sleep 30
 
-set +e
-echo "Creating Connector sfdc-connection"
-sed -i "s/PROJECT_ID/$PROJECT_ID/g" sfdc-leads/connectors/sfdc-connection.json
-integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
-result=$?
-set -e
-sleep 30
+## BQ end
 
-if [ $result -ne 0 ]; then
-  echo "Connector operation"
-  integrationcli connectors operations list -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN"
+# export SFDC_USER_PASS="$(gcloud compute instances describe lab-startup --project ${PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcUserPass") | .value')"
+# export SFDC_SEC_TOKEN="$(gcloud compute instances describe lab-startup --project ${PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcSecToken") | .value')"
 
-  echo "Retrying Connector creation"
-  integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
-  sleep 30
-fi
-echo "Connector sfdc-connection created successfully"
+# add_secret "user-sfdc-password" "${SFDC_USER_PASS}" # TODO
+# add_secret "sfdc-secret-token" "${SFDC_SEC_TOKEN}" # TODO
 
-publish_integration "sfdc-leads"
-publish_integration "sfdc-tasks"
-publish_integration "sfdc-opportunity"
+# sleep 30
 
-echo "Cleanup metadata"
-gcloud compute instances remove-metadata lab-startup --project="${PROJECT_ID}" --zone="${GCP_PROJECT_ZONE}" --keys=sfdcSecToken,sfdcUserPass
+# set +e
+# echo "Creating Connector sfdc-connection"
+# sed -i "s/PROJECT_ID/$PROJECT_ID/g" sfdc-leads/connectors/sfdc-connection.json
+# integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
+# result=$?
+# set -e
+# sleep 30
+
+# if [ $result -ne 0 ]; then
+#   echo "Connector operation"
+#   integrationcli connectors operations list -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN"
+
+#   echo "Retrying Connector creation"
+#   integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
+#   sleep 30
+# fi
+# echo "Connector sfdc-connection created successfully"
+
+# publish_integration "sfdc-leads"
+# publish_integration "sfdc-tasks"
+# publish_integration "sfdc-opportunity"
+
+# echo "Cleanup metadata"
+# gcloud compute instances remove-metadata lab-startup --project="${PROJECT_ID}" --zone="${GCP_PROJECT_ZONE}" --keys=sfdcSecToken,sfdcUserPass
