@@ -65,23 +65,14 @@ add_secret "sfdc-secret-token" "${SFDC_SEC_TOKEN}" # TODO
 
 sleep 30
 
-set +e
 echo "Creating Connector sfdc-connection"
 sed -i "s/PROJECT_ID/$PROJECT_ID/g" sfdc-leads/connectors/sfdc-connection.json
-integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
-result=$?
-set -e
-echo "Connector sfdc-connection created successfully"
-sleep 30
+integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g
+sleep 300
 
-if [ $result -ne 0 ]; then
-  echo "Connector operation"
-  integrationcli connectors operations list -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN"
+echo "Retrying Connector creation"
+integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g
 
-  echo "Retrying Connector creation"
-  integrationcli connectors create -n sfdc-connection -f sfdc-leads/connectors/sfdc-connection.json -p "$PROJECT_ID" -r "$GCP_PROJECT_REGION" -t "$TOKEN" -g --wait
-  sleep 30
-fi
 
 publish_integration "sfdc-leads"
 publish_integration "sfdc-tasks"
