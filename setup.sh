@@ -59,7 +59,7 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com" \
     --role="roles/secretmanager.secretAccessor"
 
-sleep 2400
+sleep 900
 
 export SFDC_USER_PASS="$(gcloud compute instances describe lab-startup --project ${PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcUserPass") | .value')"
 export SFDC_SEC_TOKEN="$(gcloud compute instances describe lab-startup --project ${PROJECT_ID} --zone ${GCP_PROJECT_ZONE}  --format=json | jq -r '.metadata.items[] | select(.key == "sfdcSecToken") | .value')"
